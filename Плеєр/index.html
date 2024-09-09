@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            height: 100vh;
+        }
+        .player-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            background: #181818;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 230px;
+            background: #000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .playlist {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .track-list {
+            list-style-type: none;
+        }
+        .track-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-radius: 4px;
+        }
+        .track-item:hover {
+            background-color: #282828;
+        }
+        .track-item.active {
+            background-color: #1db954;
+        }
+        .track-cover {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        .track-info {
+            flex-grow: 1;
+        }
+        .track-title {
+            font-weight: bold;
+            color: #fff;
+        }
+        .track-artist {
+            font-size: 0.9em;
+            color: #b3b3b3;
+        }
+        .player {
+            background: #282828;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .current-track-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .current-track-cover {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        .current-track-details {
+            flex-grow: 1;
+        }
+        .current-track-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .current-track-artist {
+            font-size: 1em;
+            color: #b3b3b3;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 4px;
+            background: #535353;
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .progress {
+            width: 0;
+            height: 100%;
+            background: #1db954;
+            transition: width 0.1s linear;
+        }
+        .time {
+            font-size: 0.8em;
+            color: #b3b3b3;
+            margin: 0 10px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .control-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            font-size: 24px;
+            margin: 0 15px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .control-btn:hover {
+            color: #fff;
+        }
+        .play-pause {
+            font-size: 40px;
+            color: #fff;
+        }
+        .lyrics-btn {
+            background: none;
+            border: none;
+            color: #b3b3b3;
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.2s;
+            margin-top: 10px;
+        }
+        .lyrics-btn:hover {
+            color: #fff;
+        }
+        .lyrics-container {
+            display: none;
+            background: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .lyrics-container.show {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .player-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="sidebar">
+            <h2>Плейлист</h2>
+            <div class="playlist">
+                <ul class="track-list">
+                    <!-- Треки будуть додані через JavaScript -->
+                </ul>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="player">
+                <div class="current-track-info">
+                    <img class="current-track-cover" src="" alt="Track cover">
+                    <div class="current-track-details">
+                        <h2 class="current-track-title"></h2>
+                        <p class="current-track-artist"></p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <div class="progress-container">
+                        <span class="time current-time">0:00</span>
+                        <div class="progress-bar">
+                            <div class="progress"></div>
+                        </div>
+                        <span class="time total-time">0:00</span>
+                    </div>
+                    <div class="buttons">
+                        <button class="control-btn previous">
+      ⏩
+     </button>
+                        <button class="control-btn play-pause">►</button>
+                        <button class="control-btn next">⏪️</button>
+                    </div>
+                    <button class="lyrics-btn">Показати текст</button>
+                </div>
+            </div>
+            <div class="lyrics-container">
+                <!-- Текст пісні буде доданий через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tracks = [
+            {
+                id: 1,
+                title: "Мир серед війни",
+                artist: "Purim Music",
+                cover: "thumb.jpg",
+                audio: "purimmyr.mp3",
+                lyrics: "1 куплет:                                                                                 Я приношу Тобі тривоги, Мої поразки й перемоги - Я віддаю їх Тобі.І приношу Тобі проблеми,Сльози душі   мої даремні - Я віддаю їх Тобі, Я віддаю їх Тобі."
+            },
+            {
+                id: 2,
+                title: "Гімн Небесний",
+                artist: "Андрій Ніколайчик",
+                cover: "thumb (1).jpg",
+                audio: "gymnnebes.mp3",
+                lyrics: "There's a lady who's sure all that glitters is gold..."
+            },
+            {
+                id: 3,
+                title: "Слав",
+                artist: "Purim music",
+                cover: "thumb (2).jpg",
+                audio: "slavpurim.mp3",
+                lyrics: "Imagine there's no heaven, it's easy if you try..."
+            },
+            {
+                id: 4,
+                title: "Бог завіту",
+                artist: "Purim Music",
+                cover: "thumb (2).jpg",
+                audio: "bogzavity.mp3",
+                lyrics: "Load up on guns, bring your friends..."
+            },
+            {
+                id: 5,
+                title: "Небеса",
+                artist: "Андрій Грифель",
+                cover: "thumb (3).jpg",
+                audio: "nebesa.mp3",
+                lyrics: "She was more like a beauty queen from a movie scene..."
+            }
+        ];
+
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+        const audio = new Audio();
+
+        const trackListElement = document.querySelector('.track-list');
+        const currentTrackCoverElement = document.querySelector('.current-track-cover');
+        const currentTrackTitleElement = document.querySelector('.current-track-title');
+        const currentTrackArtistElement = document.querySelector('.current-track-artist');
+        const playPauseButton = document.querySelector('.play-pause');
+        const previousButton = document.querySelector('.previous');
+        const nextButton = document.querySelector('.next');
+        const progressBar = document.querySelector('.progress');
+        const progressContainer = document.querySelector('.progress-bar');
+        const currentTimeElement = document.querySelector('.current-time');
+        const totalTimeElement = document.querySelector('.total-time');
+        const lyricsButton = document.querySelector('.lyrics-btn');
+        const lyricsContainer = document.querySelector('.lyrics-container');
+
+        function renderPlaylist() {
+            trackListElement.innerHTML = tracks.map((track, index) => `
+                <li class="track-item ${index === currentTrackIndex ? 'active' : ''}" data-index="${index}">
+                    <img src="${track.cover}" alt="${track.title}" class="track-cover">
+                    <div class="track-info">
+                        <div class="track-title">${track.title}</div>
+                        <div class="track-artist">${track.artist}</div>
+                    </div>
+                </li>
+            `).join('');
+
+            trackListElement.querySelectorAll('.track-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    currentTrackIndex = parseInt(item.dataset.index);
+                    loadTrack();
+                    playTrack();
+                });
+            });
+        }
+
+        function loadTrack() {
+            const track = tracks[currentTrackIndex];
+            audio.src = track.audio;
+            currentTrackCoverElement.src = track.cover;
+            currentTrackTitleElement.textContent = track.title;
+            currentTrackArtistElement.textContent = track.artist;
+            document.querySelectorAll('.track-item').forEach((item, index) => {
+                item.classList.toggle('active', index === currentTrackIndex);
+            });
+            lyricsContainer.textContent = track.lyrics;
+        }
+
+        function playTrack() {
+            audio.play();
+            isPlaying = true;
+            playPauseButton.textContent = '▶';
+        }
+
+        function pauseTrack() {
+            audio.pause();
+            isPlaying = false;
+            playPauseButton.textContent = '❚❚';
+        }
+
+        function formatTime(time) {
+            const minutes = Math.floor(time / 60);
+            const seconds = Math.floor(time % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        playPauseButton.addEventListener('click', () => {
+            if (isPlaying) {
+                pauseTrack();
+            } else {
+                playTrack();
+            }
+        });
+
+        previousButton.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+            loadTrack();
+            playTrack();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack();
+            playTrack();
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentTimeElement.textContent = formatTime(audio.currentTime);
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            totalTimeElement.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack();
+            playTrack();
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const clickPosition = e.offsetX / progressContainer.offsetWidth;
+            audio.currentTime = clickPosition * audio.duration;
+        });
+
+        lyricsButton.addEventListener('click', () => {
+            lyricsContainer.classList.toggle('show');
+            lyricsButton.textContent = lyricsContainer.classList.contains('show') ? 'Сховати текст' : 'Показати текст';
+        });
+
+        renderPlaylist();
+        loadTrack();
+    </script>
+</body>
+</html>
